@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Book Management - Pahana Edu</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', sans-serif; }
+    body { background:#121212; color:#e0e0e0; padding:20px; }
+
+    /* Top Navbar */
+    .navbar {
+      background: #1e1e1e;
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #333;
+    }
+    .navbar h1 { font-size: 22px; color: #4dabf7; }
+    .navbar a {
+      margin-left: 20px;
+      text-decoration: none;
+      color: #bbb;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+    .navbar a:hover { color: #4dabf7; }
+
+    h1 { margin-bottom:20px; color:#4dabf7; }
+    h2 { margin-top:40px; margin-bottom:15px; color:#4dabf7; }
+
+    /* Controls */
+    .controls { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px; }
+    .search-box input { padding:10px; border-radius:5px; border:none; outline:none; background:#1e1e1e; color:#fff; }
+    .buttons button { padding:10px 15px; border:none; border-radius:5px; cursor:pointer; font-weight:600; transition:0.3s; }
+    .add-btn { background:#43a047; color:white; }
+    .buttons button:hover { opacity:0.8; }
+
+    /* Table */
+    table { width:100%; border-collapse:collapse; margin-top:15px; background:#1e1e1e; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.6); }
+    th, td { padding:14px; text-align:left; border-bottom:1px solid #333; }
+    th { background:#2c2c2c; color:#ddd; }
+    tr:hover { background:#2a2a2a; }
+    td.status-available { color:#43a047; font-weight:bold; }
+    td.status-outofstock { color:#e53935; font-weight:bold; }
+
+    .action-btn { padding:5px 8px; border:none; border-radius:5px; cursor:pointer; font-size:14px; margin-right:5px; }
+    .edit-btn { background:#ffb300; color:black; }
+    .delete-btn { background:#e53935; color:white; }
+
+    /* Modal */
+    .modal { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); justify-content:center; align-items:center; }
+    .modal-content { background:#1e1e1e; padding:20px; border-radius:10px; width:400px; box-shadow:0 2px 8px rgba(0,0,0,0.6); }
+    .modal-content h2 { color:#4dabf7; margin-bottom:15px; }
+    .modal-content input, .modal-content select { width:100%; padding:10px; margin:8px 0; border-radius:5px; border:none; background:#2c2c2c; color:#fff; }
+    .save-btn { background:#43a047; color:white; width:100%; margin-top:10px; padding:10px; border-radius:5px; cursor:pointer; }
+    .close-btn { background:#e53935; color:white; width:100%; margin-top:5px; padding:10px; border-radius:5px; cursor:pointer; }
+  </style>
+</head>
+<body>
+
+      <!-- Top Navbar -->
+  <div class="navbar">
+    <h1>📚 Pahana Edu - Book Management</h1>
+    <div>
+      <a href="#">Dashboard</a>
+      <a href="#">Customers</a>
+      <a href="#">Items</a>
+      <a href="#">Resavation</a>
+      <a href="#">Billing</a>
+      <a href="#">Logout</a>
+    </div>
+  </div>
+
+  
+
+  <h2>📖 Books</h2>
+  <div class="controls">
+    <div class="search-box">
+      <input type="text" id="searchBook" placeholder="Search Book..." onkeyup="searchBook()">
+    </div>
+    <div class="buttons">
+      <button class="add-btn" onclick="openBookModal()">➕ Add Book</button>
+    </div>
+  </div>
+
+  <table id="bookTable">
+    <tr>
+      <th>ID</th>
+      <th>Title</th>
+      <th>Author</th>
+      <th>Price</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </table>
+
+  <!-- MODAL -->
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <h2 id="modalTitle">Add Book</h2>
+      <input type="text" id="titleName" placeholder="Book Title">
+      <input type="text" id="authorCategory" placeholder="Author">
+      <input type="number" id="priceInput" placeholder="Price">
+      <select id="statusInput">
+        <option value="available">Available</option>
+        <option value="outofstock">Out of Stock</option>
+      </select>
+      <button class="save-btn" onclick="saveEntry()">💾 Save</button>
+      <button class="close-btn" onclick="closeModal()">❌ Close</button>
+    </div>
+  </div>
+
+  <script>
+    let books = [
+      {id:1,title:'Mathematics 101',author:'John Doe',price:500,status:'available'},
+      {id:2,title:'Science Basics',author:'Jane Smith',price:450,status:'outofstock'}
+    ];
+
+    let editingEntry = null;
+
+    function displayBooks() {
+      const table = document.getElementById("bookTable");
+      table.innerHTML = `
+        <tr>
+          <th>ID</th><th>Title</th><th>Author</th><th>Price</th><th>Status</th><th>Actions</th>
+        </tr>`;
+      books.forEach(book=>{
+        const row = table.insertRow();
+        row.innerHTML = `
+          <td>${book.id}</td>
+          <td>${book.title}</td>
+          <td>${book.author}</td>
+          <td>$${book.price}</td>
+          <td class="${book.status==='available'?'status-available':'status-outofstock'}">${book.status.charAt(0).toUpperCase()+book.status.slice(1)}</td>
+          <td>
+            <button class="action-btn edit-btn" onclick="editBook(this)">✏️ Edit</button>
+            <button class="action-btn delete-btn" onclick="deleteBook(this)">🗑 Delete</button>
+          </td>
+        `;
+      });
+    }
+
+    function openBookModal() {
+      editingEntry=null;
+      document.getElementById("modalTitle").innerText='Add Book';
+      document.getElementById("titleName").value='';
+      document.getElementById("authorCategory").value='';
+      document.getElementById("priceInput").value='';
+      document.getElementById("statusInput").value='available';
+      document.getElementById("modal").style.display='flex';
+    }
+
+    function closeModal() { document.getElementById("modal").style.display='none'; }
+
+    function saveEntry() {
+      const title = document.getElementById("titleName").value;
+      const author = document.getElementById("authorCategory").value;
+      const price = Number(document.getElementById("priceInput").value);
+      const status = document.getElementById("statusInput").value;
+
+      if(editingEntry){
+        const index = editingEntry.rowIndex-1;
+        books[index] = {...books[index], title, author, price, status};
+      } else {
+        const id = books.length?books[books.length-1].id+1:1;
+        books.push({id,title,author,price,status});
+      }
+      displayBooks();
+      closeModal();
+    }
+
+    function editBook(button){
+      editingEntry=button.parentElement.parentElement;
+      const index = editingEntry.rowIndex-1;
+      const book=books[index];
+      document.getElementById("modalTitle").innerText='Edit Book';
+      document.getElementById("titleName").value=book.title;
+      document.getElementById("authorCategory").value=book.author;
+      document.getElementById("priceInput").value=book.price;
+      document.getElementById("statusInput").value=book.status;
+      document.getElementById("modal").style.display='flex';
+    }
+
+    function deleteBook(button){
+      if(confirm("Are you sure to delete this book?")){
+        const row = button.parentElement.parentElement;
+        books.splice(row.rowIndex-1,1);
+        displayBooks();
+      }
+    }
+
+    function searchBook(){
+      const input=document.getElementById("searchBook").value.toLowerCase();
+      const table=document.getElementById("bookTable");
+      for(let i=1;i<table.rows.length;i++){
+        let name=table.rows[i].cells[1].innerText.toLowerCase();
+        table.rows[i].style.display=name.includes(input)?'':'none';
+      }
+    }
+
+    displayBooks();
+  </script>
+
+</body>
+</html>

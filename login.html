@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Login - Pahana Edu</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-card {
+      background: #1c1c1c;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.7);
+      width: 350px;
+      color: #fff;
+    }
+    .login-card h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #4cafef;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #444;
+      background: #2a2a2a;
+      color: #fff;
+      font-size: 14px;
+    }
+    input:focus {
+      outline: none;
+      border-color: #4cafef;
+    }
+    .error {
+      border-color: #e74c3c !important;
+    }
+    .error-msg {
+      color: #e74c3c;
+      font-size: 13px;
+      margin-top: 5px;
+      display: none;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      background: #4cafef;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #3794d4;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-card">
+    <h2>Admin Login</h2>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username">
+        <div id="userError" class="error-msg">Username is required</div>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password">
+        <div id="passError" class="error-msg">Password is required</div>
+      </div>
+      <button type="submit">Login</button>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById("loginForm");
+    const username = document.getElementById("username");
+    const password = document.getElementById("password");
+    const userError = document.getElementById("userError");
+    const passError = document.getElementById("passError");
+
+    // Predefined username and password
+    const validUsername = "admin";
+    const validPassword = "admin123";
+
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+      let valid = true;
+
+      if (username.value.trim() === "") {
+        username.classList.add("error");
+        userError.style.display = "block";
+        alert("Username is required!");
+        valid = false;
+      } else {
+        username.classList.remove("error");
+        userError.style.display = "none";
+      }
+
+      if (password.value.trim() === "") {
+        password.classList.add("error");
+        passError.style.display = "block";
+        alert("Password is required!");
+        valid = false;
+      } else {
+        password.classList.remove("error");
+        passError.style.display = "none";
+      }
+
+      if (valid) {
+        if (username.value.trim() === validUsername && password.value.trim() === validPassword) {
+          alert("Login successful!");
+          // window.location.href = "dashboard.html"; // redirect to dashboard
+        } else {
+          alert("Incorrect username or password!");
+          username.classList.add("error");
+          password.classList.add("error");
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>
