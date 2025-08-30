@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard - Dark Theme</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #121212;
+      color: #e0e0e0;
+    }
+
+    /* Top Navbar */
+    .navbar {
+      background: #1e1e1e;
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #333;
+    }
+    .navbar h1 { font-size: 22px; color: #4dabf7; }
+    .navbar a {
+      margin-left: 20px;
+      text-decoration: none;
+      color: #bbb;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+    .navbar a:hover { color: #4dabf7; }
+
+    /* Container */
+    .container {
+      padding: 20px;
+    }
+
+    /* KPI Cards */
+    .kpi-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .kpi-card {
+      background: #1e1e1e;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+      transition: 0.3s;
+    }
+    .kpi-card:hover { transform: translateY(-4px); }
+    .kpi-card h2 { color: #4dabf7; font-size: 28px; }
+    .kpi-card p { color: #aaa; font-size: 14px; }
+
+    /* Charts */
+    .charts {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+    canvas {
+      background: #1e1e1e;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    }
+
+    /* Table */
+    .table-section {
+      margin-top: 30px;
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    }
+    h2 { margin-bottom: 10px; color: #4dabf7; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #333;
+      text-align: left;
+    }
+    th { background: #2c2c2c; color: #ddd; }
+    td { color: #ccc; }
+  </style>
+</head>
+<body>
+  <!-- Top Navbar -->
+  <div class="navbar">
+    <h1>Admin Dashboard</h1>
+    <div>
+      <a href="dashboard.jsp">Dashboard</a>
+      <a href="Management.jsp">Customers</a>
+      <a href="item.jsp">Items</a>
+      <a href="resavation.jsp">Resavation</a>
+      <a href="billing.jsp">Billing</a>
+      <a href="#">Logout</a>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="container">
+    <!-- KPI Section -->
+    <div class="kpi-container">
+      <div class="kpi-card"><h2>5</h2><p>Active Users</p></div>
+      <div class="kpi-card"><h2>Rs. 5000</h2><p>Total Sales</p></div>
+      <div class="kpi-card"><h2>3</h2><p>Pending Orders</p></div>
+      <div class="kpi-card"><h2>5</h2><p>Support Tickets</p></div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts">
+      <canvas id="salesChart"></canvas>
+      <canvas id="usersChart"></canvas>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-section">
+      <h2>Recent Transactions</h2>
+      <table>
+        <tr>
+          <th>Transaction ID</th>
+          <th>Customer</th>
+          <th>Amount</th>
+          <th>Status</th>
+        </tr>
+        <tr>
+          <td>#TXN001</td>
+          <td>John Doe</td>
+          <td>Rs. 5,000</td>
+          <td style="color: #4caf50;">✅ Completed</td>
+        </tr>
+        <tr>
+          <td>#TXN002</td>
+          <td>Jane Smith</td>
+          <td>Rs. 2,400</td>
+          <td style="color: #ffb300;">⏳ Pending</td>
+        </tr>
+        <tr>
+          <td>#TXN003</td>
+          <td>Alex Perera</td>
+          <td>Rs. 7,800</td>
+          <td style="color: #e53935;">❌ Failed</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script>
+    // Sales Line Chart
+    const salesCtx = document.getElementById('salesChart').getContext('2d');
+    new Chart(salesCtx, {
+      type: 'line',
+      data: {
+        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+        datasets: [{
+          label: "Sales (Rs.)",
+          data: [12000, 15000, 18000, 22000, 20000, 26000],
+          borderColor: "#4dabf7",
+          backgroundColor: "rgba(77, 171, 247, 0.2)",
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: {
+        plugins: { legend: { labels: { color: "#e0e0e0" } } },
+        scales: {
+          x: { ticks: { color: "#e0e0e0" }, grid: { color: "#333" } },
+          y: { ticks: { color: "#e0e0e0" }, grid: { color: "#333" } }
+        }
+      }
+    });
+
+    // Users Pie Chart
+    const usersCtx = document.getElementById('usersChart').getContext('2d');
+    new Chart(usersCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ["Students", "Teachers", "Admins"],
+        datasets: [{
+          label: "User Roles",
+          data: [800, 180, 44],
+          backgroundColor: ["#4dabf7", "#43a047", "#e53935"]
+        }]
+      },
+      options: {
+        plugins: { legend: { labels: { color: "#e0e0e0" } } }
+      }
+    });
+  </script>
+</body>
+</html>

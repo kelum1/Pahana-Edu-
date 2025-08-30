@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pahana Edu - Billing System</title>
+<style>
+
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', sans-serif; }
+  body { background:#121212; color:#e0e0e0; padding:20px; }
+  h1,h2 { color:#4dabf7; margin-bottom:20px; }
+
+  /* Top Navbar */
+    .navbar {
+      background: #1e1e1e;
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #333;
+    }
+    .navbar h1 { font-size: 22px; color: #4dabf7; }
+    .navbar a {
+      margin-left: 20px;
+      text-decoration: none;
+      color: #bbb;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+    .navbar a:hover { color: #4dabf7; }
+
+  .controls { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px; }
+  .search-box input { padding:10px; border-radius:5px; border:none; outline:none; background:#1e1e1e; color:#fff; }
+  .buttons button { padding:10px 15px; border:none; border-radius:5px; cursor:pointer; font-weight:600; transition:0.3s; }
+  .add-btn { background:#43a047; color:white; }
+  .buttons button:hover { opacity:0.8; }
+
+  table { width:100%; border-collapse:collapse; margin-top:15px; background:#1e1e1e; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.6); }
+  th, td { padding:14px; text-align:left; border-bottom:1px solid #333; }
+  th { background:#2c2c2c; color:#ddd; }
+  tr:hover { background:#2a2a2a; }
+
+  .action-btn { padding:5px 8px; border:none; border-radius:5px; cursor:pointer; font-size:14px; margin-right:5px; }
+  .edit-btn { background:#ffb300; color:black; }
+  .delete-btn { background:#e53935; color:white; }
+  .bill-btn { background:#1976d2; color:white; }
+  .calculate-btn { background:#43a047; color:white; }
+
+  .modal { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); justify-content:center; align-items:center; }
+  .modal-content { background:#1e1e1e; padding:20px; border-radius:10px; width:450px; box-shadow:0 2px 8px rgba(0,0,0,0.6); }
+  .modal-content h2 { color:#4dabf7; margin-bottom:15px; }
+  .modal-content input, select { width:100%; padding:10px; margin:8px 0; border-radius:5px; border:none; background:#2c2c2c; color:#fff; }
+  .save-btn { background:#43a047; color:white; width:100%; margin-top:10px; padding:10px; border-radius:5px; cursor:pointer; }
+  .close-btn { background:#e53935; color:white; width:100%; margin-top:5px; padding:10px; border-radius:5px; cursor:pointer; }
+</style>
+</head>
+<body>
+
+     <!-- Top Navbar -->
+  <div class="navbar">
+    <h1>Pahana Edu - Customer Billing System</h1>
+    <div>
+      <a href="dashboard.jsp">Dashboard</a>
+      <a href="Management.jsp">Customers</a>
+      <a href="item.jsp">Items</a>
+      <a href="resavation.jsp">Resavation</a>
+      <a href="billing.jsp">Billing</a>
+      <a href="#">Logout</a>
+    
+  </div>
+  </div>
+
+
+
+<div class="controls">
+  <div class="search-box">
+    <input type="text" id="searchCustomer" placeholder="Search bill..." onkeyup="searchCustomer()">
+  </div>
+  <div class="buttons">
+    <button class="add-btn" onclick="openModal()">➕ create bill</button>
+  </div>
+</div>
+
+<table id="customerTable">
+  <tr>
+    <th>Account No</th>
+    <th>Name</th>
+    <th>Address</th>
+    <th>Phone</th>
+    <th>Books</th>
+    <th>Total Bill</th>
+    <th>Actions</th>
+  </tr>
+</table>
+
+<!-- Modal -->
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <h2 id="modalTitle"> create Bill </h2>
+    <input type="text" id="nameInput" placeholder="Customer Name">
+    <input type="text" id="addressInput" placeholder="Address">
+    <input type="text" id="phoneInput" placeholder="Phone Number">
+
+    <!-- Book Selection -->
+    <label style="color:#ddd;">Select Books (Ctrl+Click for multiple)</label>
+    <select id="booksInput" multiple>
+      <option value="Math Book,200">Math Book - ₨200</option>
+      <option value="Science Book,250">Science Book - ₨250</option>
+      <option value="English Book,180">English Book - ₨180</option>
+      <option value="History Book,220">History Book - ₨220</option>
+    </select>
+
+    <button class="save-btn" onclick="saveCustomer()">💾 Save</button>
+    <button class="close-btn" onclick="closeModal()">❌ Close</button>
+  </div>
+</div>
+
+<script>
+let customers = [];
+let editingIndex = null;
+
+function displayCustomers() {
+  const table = document.getElementById("customerTable");
+  table.innerHTML = `<tr>
+    <th>Account No</th><th>Name</th><th>Address</th><th>Phone</th><th>Books</th><th>Total Bill</th><th>Actions</th>
+  </tr>`;
+  customers.forEach((c, index)=>{
+    const totalBill = c.books.reduce((sum, book) => sum + book.price, 0);
+    const bookNames = c.books.map(b=>b.name).join(', ');
+    const row = table.insertRow();
+    row.innerHTML = `<td>${c.account}</td>
+      <td>${c.name}</td>
+      <td>${c.address}</td>
+      <td>${c.phone}</td>
+      <td>${bookNames}</td>
+      <td id="bill-${index}">₨${totalBill}</td>
+      <td>
+        <button class="action-btn edit-btn" onclick="editCustomer(${index})">✏️ Edit</button>
+        <button class="action-btn delete-btn" onclick="deleteCustomer(${index})">🗑 Delete</button>
+        <button class="action-btn calculate-btn" onclick="calculateBill(${index})">💰 Calculate Bill</button>
+        <button class="action-btn bill-btn" onclick="printBill(${index})">🖨 Print Bill</button>
+      </td>`;
+  });
+}
+
+function openModal(){
+  editingIndex = null;
+  document.getElementById("modalTitle").innerText='Create bill';
+  document.getElementById("nameInput").value='';
+  document.getElementById("addressInput").value='';
+  document.getElementById("phoneInput").value='';
+  document.getElementById("booksInput").selectedIndex=-1;
+  document.getElementById("modal").style.display='flex';
+}
+
+function closeModal(){ document.getElementById("modal").style.display='none'; }
+
+function saveCustomer(){
+  const name = document.getElementById("nameInput").value;
+  const address = document.getElementById("addressInput").value;
+  const phone = document.getElementById("phoneInput").value;
+  const booksSelect = document.getElementById("booksInput");
+  const selectedBooks = Array.from(booksSelect.selectedOptions).map(opt=>{
+    const [bname, price] = opt.value.split(',');
+    return {name:bname, price:Number(price)};
+  });
+
+  if(editingIndex !== null){
+    customers[editingIndex] = {...customers[editingIndex], name,address,phone,books:selectedBooks};
+  } else {
+    const account = customers.length ? customers[customers.length-1].account+1 : 1001;
+    customers.push({account,name,address,phone,books:selectedBooks});
+  }
+  displayCustomers();
+  closeModal();
+}
+
+function editCustomer(index){
+  editingIndex = index;
+  const c = customers[index];
+  document.getElementById("modalTitle").innerText='Edit Customer';
+  document.getElementById("nameInput").value = c.name;
+  document.getElementById("addressInput").value = c.address;
+  document.getElementById("phoneInput").value = c.phone;
+  const booksSelect = document.getElementById("booksInput");
+  Array.from(booksSelect.options).forEach(opt=>{
+    opt.selected = c.books.some(b => b.name === opt.value.split(',')[0]);
+  });
+  document.getElementById("modal").style.display='flex';
+}
+
+function deleteCustomer(index){
+  if(confirm("Are you sure to delete this customer?")){
+    customers.splice(index,1);
+    displayCustomers();
+  }
+}
+
+function searchCustomer(){
+  const input = document.getElementById("searchCustomer").value.toLowerCase();
+  const table = document.getElementById("customerTable");
+  for(let i=1;i<table.rows.length;i++){
+    let name = table.rows[i].cells[1].innerText.toLowerCase();
+    table.rows[i].style.display = name.includes(input) ? '' : 'none';
+  }
+}
+
+function calculateBill(index){
+  const totalBill = customers[index].books.reduce((sum, book)=>sum + book.price,0);
+  document.getElementById(`bill-${index}`).innerText = `₨${totalBill}`;
+  alert(`Bill for ${customers[index].name}: ₨${totalBill}`);
+}
+
+function printBill(index){
+  const c = customers[index];
+  const totalBill = c.books.reduce((sum, book)=>sum + book.price,0);
+  const bookNames = c.books.map(b=>b.name).join(', ');
+  const content = `
+    <h2>Pahana Edu - Customer Bill</h2>
+    <p><strong>Account No:</strong> ${c.account}</p>
+    <p><strong>Name:</strong> ${c.name}</p>
+    <p><strong>Address:</strong> ${c.address}</p>
+    <p><strong>Phone:</strong> ${c.phone}</p>
+    <p><strong>Books:</strong> ${bookNames}</p>
+    <p><strong>Total Bill:</strong> ₨${totalBill}</p>
+  `;
+  const win = window.open('','','width=400,height=600');
+  win.document.write(content);
+  win.document.close();
+  win.print();
+}
+
+displayCustomers();
+</script>
+
+</body>
+</html>
